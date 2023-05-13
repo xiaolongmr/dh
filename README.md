@@ -1,5 +1,9 @@
 ✍🏼[视觉传达](https://xiaolongmr.github.io/) 常用的设计类型的一些网站收藏
 
+基于`程序员小兵`大佬开源分享的静态html导航制作，在这里感谢大佬开源
+
+大佬开源地址：[geekape/geek-navigation at master (github.com)](https://github.com/geekape/geek-navigation/tree/master)
+
 > **👋前言：**
 >
 > 做这个网站的最初想法是大一的时候遇到好用的网站，有一位朋友需要用到就得得通过社交软件发送一次网站的链接🔗
