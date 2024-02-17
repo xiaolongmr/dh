@@ -1,0 +1,104 @@
+/* root 💕 */
+:root {
+    /* 默认字体的颜色 */
+    --Body-font-color: #4d4d4d;
+    /* 详细介绍字体的颜色 */
+    --BoxItemDesc-font-color: rgb(89, 89, 89);
+    /* 网站logo字体颜色 */
+    --BoxItemLogo-font-color: #3273dc;
+    /* box大盒子背景颜色 */
+    --BoxBackImg: linear-gradient(45deg, #f4f2f9 0%, #eaf4f8 100%);
+    /* box里网址小盒子背景颜色 */
+    --BoxItemBackground-color: linear-gradient(135deg, #d4e8f6 0%, #e6e6f6 100%);
+    /* 网页背景颜色 */
+    --BodyBackground-color: #ffffff;
+    /* box大盒子投影 */
+    --Box-shadow: 0 1px 20px 0 #ecf2f9;
+    /* box大盒子hover投影 */
+    --Box_hover-shadow: inset 9px 7px 20px 9px #ecf2f9;
+    /* 默认返回顶部背景颜色&手机端右下方导航按钮默认背景颜色 */
+    --gototop-back-color: #fff;
+    /* 返回顶部箭头颜色 */
+    --gototop-svg-color: rgb(199, 196, 196);
+    /* 小尬聊天顶部背景颜色 */
+    --ctrm-title-bgcolor: linear-gradient(90deg, #FFDEE9 0%, #B5FFFC 100%);
+    /* 小尬聊天顶部字体色 */
+    --ctrm-title-color: #444;
+    /* 小尬聊天左边背景颜色 */
+    --ctrm-panel-bgcolor: rgb(252, 252, 252);
+    /* 左栏背景颜色 */
+    --left-bar-bgcolor: #30333c;
+    /* 左栏a标签的字体颜色 */
+    --left-bar-font-color: #c5c5c5;
+}
+
+/*======✨✨【小尬聊天室】✨✨ 修改日期：2022/07/18======*/
+#ctrm_ {
+    /* 通用样式 */
+
+    .ctrm-textarea textarea {
+        /* 聊天室下面的gif动画 */
+        background: #ffffff url(https://gitee.com/xhcy1116/smile/raw/master/loading/loading1.webp) no-repeat !important;
+        background-position: top right !important;
+        /* 好像下面的没并不能铺满盒子 */
+        background-size: 60% !important;
+    }
+
+    .ctrm-title {
+        background-color: #FFDEE9;
+        background-image: var(--ctrm-title-bgcolor) !important;
+        color: var(--ctrm-title-color) !important;
+    }
+
+    /* 刷新 */
+    .ctrm-title-reconn {
+        /* line-height: 2vw!important; */
+        border: 1px solid #999;
+        background: #f4f4f4;
+    }
+
+    .ctrm-panel {
+        background: var(--BoxBackImg) !important;
+    }
+
+    .ctrm-container {
+        position: relative;
+        width: 35vw;
+        height: 40vw;
+        max-height: 85vh;
+        border: 1px solid #e7e7e7;
+        font-size: 0;
+        border-top-left-radius: 2vw;
+        overflow: hidden;
+        transition: all 0.3s;
+        background-color: #f8ffffcc;
+        background: #f7f7f7 border-box;
+        /* backdrop-filter: blur(.2rem); */
+    }
+}
+
+/* 修改日期：2022/07/14 修改小尬的字体颜色 */
+.ctrm-online-wrap div:nth-child(1) {
+    color: hotpink;
+}
+
+/* 选择2的倍数的在线列表 */
+.ctrm-online-wrap div:nth-child(2n) {
+    color: #144a74;
+}
+
+
+/* 修改日期：2022/03/25 添加伪元素为小尬添加后缀 */
+
+.ctrm-online-wrap div:nth-child(1):after {
+    content: " (机器人)";
+}
+
+
+
+#ctrm_ .ctrm-close .ctrm-mobile .ctrm-container {
+    /* 小尬聊天室手机端收起时的宽度 */
+    width: 76vw !important;
+}
+
+/*======🎊🎊【小尬聊天室end】🎊🎊======*/
