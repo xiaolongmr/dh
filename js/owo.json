@@ -1042,5 +1042,95 @@
         "text": "疑问"
       }
     ]
+  },
+  "<img src=\"https://tools.kalvinbg.cn/static/image/emotion/tuzki/1.gif\" style=\"height: 1rem;transform: scale(1.4);vertical-align: middle;position: relative;\" title=\"小黄豆\">": {
+    "type": "tuzki",
+    "name": "tuzki/",
+    "container": [
+      {
+        "icon": "1",
+        "text": "死亡微笑"
+      },
+      {
+        "icon": "2",
+        "text": ""
+      },
+      {
+        "icon": "3",
+        "text": ""
+      },
+      {
+        "icon": "4",
+        "text": ""
+      },
+      {
+        "icon": "5",
+        "text": ""
+      },
+      {
+        "icon": "6",
+        "text": ""
+      },
+      {
+        "icon": "7",
+        "text": ""
+      },
+      {
+        "icon": "8",
+        "text": ""
+      },
+      {
+        "icon": "9",
+        "text": ""
+      },
+      {
+        "icon": "10",
+        "text": ""
+      },
+      {
+        "icon": "11",
+        "text": ""
+      },
+      {
+        "icon": "12",
+        "text": ""
+      },
+      {
+        "icon": "13",
+        "text": ""
+      },
+      {
+        "icon": "14",
+        "text": ""
+      },
+      {
+        "icon": "15",
+        "text": ""
+      },
+      {
+        "icon": "16",
+        "text": ""
+      },
+      {
+        "icon": "17",
+        "text": ""
+      },
+      {
+        "icon": "18",
+        "text": ""
+      },
+      {
+        "icon": "19",
+        "text": ""
+      },
+      {
+        "icon": "20",
+        "text": ""
+      },
+      {
+        "icon": "21",
+        "text": ""
+      }
+    ]
   }
 }
