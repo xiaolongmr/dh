@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图床上传工具 - 粘贴上传至CloudFlare图床</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            width: 280px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #1a2980;
+        }
+
+        .feature-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: #1a2980;
+        }
+
+        .feature-desc {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #1a2980;
+            text-align: center;
+        }
+
+        .upload-area {
+            border: 3px dashed #1a2980;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(26, 41, 128, 0.05);
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .upload-area:hover {
+            background: rgba(26, 41, 128, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 5rem;
+            color: #1a2980;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            color: white;
+            box-shadow: 0 4px 15px rgba(26, 41, 128, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1a2980;
+            border: 2px solid #1a2980;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(26, 41, 128, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .config-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .config-item {
+            background: rgba(26, 41, 128, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .config-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #1a2980;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .config-value {
+            font-size: 1.1rem;
+            color: #333;
+            word-break: break-all;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* 通知样式 */
+        .img-upload-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 9999;
+            max-width: 300px;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(20px);
+        }
+
+        .img-upload-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .img-upload-success {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .img-upload-error {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .img-upload-info {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .img-upload-close {
+            float: right;
+            margin-left: 10px;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .img-upload-close:hover {
+            opacity: 1;
+        }
+
+        /* 拖拽区域样式 */
+        .img-upload-dropzone {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(33, 150, 243, 0.2);
+            border: 3px dashed #2196F3;
+            z-index: 9998;
+            box-sizing: border-box;
+        }
+
+        .img-upload-dropzone.active {
+            display: block;
+        }
+
+        .img-upload-dropzone-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px 40px;
+            border-radius: 8px;
+            font-size: 18px;
+            color: #2196F3;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .feature-card {
+                width: 100%;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>图床上传工具</h1>
+            <p class="subtitle">粘贴或拖拽图片上传至CloudFlare图床，自动生成Markdown格式的图片链接，提高内容创作效率</p>
+        </header>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3 class="feature-title">粘贴上传</h3>
+                <p class="feature-desc">在任何输入框中粘贴图片，自动上传至图床并插入Markdown链接</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🖼️</div>
+                <h3 class="feature-title">拖拽上传</h3>
+                <p class="feature-desc">将图片文件拖拽到输入框区域，自动完成上传过程</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">⚙️</div>
+                <h3 class="feature-title">自定义配置</h3>
+                <p class="feature-desc">设置服务器地址、认证码、上传参数等个性化选项</p>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h2 class="section-title">开始使用图床上传工具</h2>
+
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">⬆️</div>
+                <p class="upload-text">粘贴图片(Ctrl+V)或拖拽图片文件到此处上传</p>
+                <p><small>支持JPG, PNG, GIF, WebP格式，最大文件5MB</small></p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="configBtn">
+                    <span>⚙️</span> 配置图床参数
+                </button>
+                <button class="btn btn-secondary" id="usageBtn">
+                    <span>❓</span> 使用说明
+                </button>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h2 class="section-title">当前配置</h2>
+            <div class="config-grid" id="currentConfig">
+                <!-- 配置信息将通过JS动态生成 -->
+            </div>
+        </div>
+
+        <footer>
+            <p>图床上传工具 v0.4.1 | 适配 CloudFlare-ImgBed | MIT License</p>
+            <p>提示：此工具需要图床服务器支持，请确保配置正确的服务器地址和认证码</p>
+        </footer>
+    </div>
+
+    <!-- 拖拽区域 -->
+    <div class="img-upload-dropzone" id="dropZone">
+        <div class="img-upload-dropzone-message">释放鼠标上传图片</div>
+    </div>
+
+    <script>
+        // 图片上传工具核心逻辑
+        (function () {
+            'use strict';
+
+            // 防止重复注入
+            if (window.imageUploaderInitialized) {
+                return;
+            }
+            window.imageUploaderInitialized = true;
+
+            // 默认配置信息
+            const DEFAULT_CONFIG = {
+                AUTH_CODE: 'z-l.top',
+                SERVER_URL: 'https://img.z-l.top',
+                UPLOAD_PARAMS: {
+                    serverCompress: true,
+                    uploadChannel: 'telegram',
+                    autoRetry: true,
+                    uploadNameType: 'short',
+                    returnFormat: 'full',
+                    uploadFolder: 'img/test'
+                },
+                NOTIFICATION_DURATION: 3000,
+                MARKDOWN_TEMPLATE: '![{filename}]({url})',
+                AUTO_COPY_URL: false,
+                ALLOWED_HOSTS: ['*'],
+                MAX_FILE_SIZE: 5 * 1024 * 1024
+            };
+
+            // 从localStorage获取用户配置
+            function getConfig() {
+                const savedConfig = localStorage.getItem('imageUploaderConfig');
+                if (savedConfig) {
+                    try {
+                        return JSON.parse(savedConfig);
+                    } catch (e) {
+                        console.error('Error parsing saved config', e);
+                    }
+                }
+                return { ...DEFAULT_CONFIG };
+            }
+
+            // 保存配置到localStorage
+            function saveConfig(config) {
+                localStorage.setItem('imageUploaderConfig', JSON.stringify(config));
+            }
+
+            // 当前配置
+            let CONFIG = getConfig();
+
+            // 显示通知的函数
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `img-upload-notification img-upload-${type}`;
+
+                const closeBtn = document.createElement('span');
+                closeBtn.className = 'img-upload-close';
+                closeBtn.textContent = '✕';
+                closeBtn.onclick = () => removeNotification(notification);
+
+                const messageSpan = document.createElement('span');
+                messageSpan.textContent = message;
+
+                notification.appendChild(closeBtn);
+                notification.appendChild(messageSpan);
+                document.body.appendChild(notification);
+
+                // 添加显示动画
+                setTimeout(() => notification.classList.add('show'), 10);
+
+                // 自动消失
+                const timeout = setTimeout(() => removeNotification(notification), CONFIG.NOTIFICATION_DURATION);
+
+                // 鼠标悬停时暂停消失
+                notification.addEventListener('mouseenter', () => clearTimeout(timeout));
+                notification.addEventListener('mouseleave', () => setTimeout(() => removeNotification(notification), 1000));
+            }
+
+            // 移除通知
+            function removeNotification(notification) {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+
+            // 复制文本到剪贴板
+            function copyToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showNotification('链接已复制到剪贴板！', 'success');
+                } catch (err) {
+                    showNotification('复制失败：' + err.message, 'error');
+                }
+                document.body.removeChild(textarea);
+            }
+
+            // 检查文件大小
+            function checkFileSize(file) {
+                if (file.size > CONFIG.MAX_FILE_SIZE) {
+                    showNotification(`文件大小超过限制（${Math.round(CONFIG.MAX_FILE_SIZE / 1024 / 1024)}MB）`, 'error');
+                    return false;
+                }
+                return true;
+            }
+
+            // 上传图片
+            async function uploadImage(blob, targetElement) {
+                const formData = new FormData();
+                const filename = `pasted-image-${Date.now()}.png`;
+                formData.append('file', blob, filename);
+
+                const queryParams = new URLSearchParams({
+                    authCode: CONFIG.AUTH_CODE,
+                    ...CONFIG.UPLOAD_PARAMS
+                }).toString();
+
+                try {
+                    showNotification('正在上传图片，请稍候...', 'info');
+
+                    const response = await fetch(`${CONFIG.SERVER_URL}/upload?${queryParams}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+
+                        if (result && result.length > 0) {
+                            const imageUrl = result[0].src;
+                            insertMarkdownImage(imageUrl, targetElement, filename);
+                            showNotification('图片上传成功！', 'success');
+
+                            if (CONFIG.AUTO_COPY_URL) {
+                                copyToClipboard(imageUrl);
+                            }
+                        } else {
+                            showNotification('上传成功但未获取到图片链接', 'error');
+                        }
+                    } else {
+                        let errorMsg = '上传失败';
+                        try {
+                            const errorResponse = await response.json();
+                            errorMsg += '：' + (errorResponse.message || response.statusText);
+                        } catch (e) {
+                            errorMsg += `（状态码：${response.status}）`;
+                        }
+                        showNotification(errorMsg, 'error');
+                    }
+                } catch (error) {
+                    showNotification(`上传过程发生错误：${error.message}`, 'error');
+                }
+            }
+
+            // 在输入框中插入 Markdown 格式的图片链接
+            function insertMarkdownImage(imageUrl, element, filename) {
+                const markdownImage = CONFIG.MARKDOWN_TEMPLATE
+                    .replace('{url}', imageUrl)
+                    .replace('{filename}', filename.replace(/\.[^/.]+$/, ''));
+
+                // 对于演示页面，我们直接显示结果
+                if (element.id === 'uploadArea') {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.style.marginTop = '20px';
+                    resultDiv.style.padding = '15px';
+                    resultDiv.style.background = '#f0f8ff';
+                    resultDiv.style.borderRadius = '8px';
+                    resultDiv.style.wordBreak = 'break-all';
+
+                    resultDiv.innerHTML = `
+                        <p><strong>上传成功！生成的Markdown：</strong></p>
+                        <p style="font-family: monospace; background: #f8f8f8; padding: 10px; border-radius: 4px;">${markdownImage}</p>
+                        <p><strong>图片URL：</strong> <a href="${imageUrl}" target="_blank">${imageUrl}</a></p>
+                    `;
+
+                    element.appendChild(resultDiv);
+                }
+            }
+
+            // 创建配置界面
+            function createConfigModal() {
+                const overlay = document.createElement('div');
+                overlay.className = 'img-upload-modal-overlay';
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.right = '0';
+                overlay.style.bottom = '0';
+                overlay.style.background = 'rgba(0, 0, 0, 0.5)';
+                overlay.style.zIndex = '9999';
+
+                const modal = document.createElement('div');
+                modal.className = 'img-upload-modal';
+                modal.style.position = 'fixed';
+                modal.style.top = '50%';
+                modal.style.left = '50%';
+                modal.style.transform = 'translate(-50%, -50%)';
+                modal.style.background = 'white';
+                modal.style.padding = '20px';
+                modal.style.borderRadius = '8px';
+                modal.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                modal.style.zIndex = '10000';
+                modal.style.maxWidth = '600px';
+                modal.style.width = '90%';
+                modal.style.maxHeight = '80vh';
+                modal.style.overflowY = 'auto';
+
+                const content = `
+                    <h2 style="margin: 0 0 20px; color: #333; font-size: 18px;">图床上传配置</h2>
+                    <form id="img-upload-config-form">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">认证码</label>
+                            <input type="text" name="AUTH_CODE" value="${CONFIG.AUTH_CODE}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                            <div style="margin-top: 4px; color: #666; font-size: 12px;">用于验证上传请求的密钥</div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">服务器地址</label>
+                            <input type="text" name="SERVER_URL" value="${CONFIG.SERVER_URL}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                            <div style="margin-top: 4px; color: #666; font-size: 12px;">图床服务器的URL地址</div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">上传通道</label>
+                            <select name="uploadChannel" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background-color: white;">
+                                <option value="cfr2" ${CONFIG.UPLOAD_PARAMS.uploadChannel === 'cfr2' ? 'selected' : ''}>CloudFlare R2</option>
+                                <option value="telegram" ${CONFIG.UPLOAD_PARAMS.uploadChannel === 'telegram' ? 'selected' : ''}>Telegram</option>
+                            </select>
+                            <div style="margin-top: 4px; color: #666; font-size: 12px;">选择图片上传的存储通道</div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">文件命名方式</label>
+                            <select name="uploadNameType" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background-color: white;">
+                                <option value="default" ${CONFIG.UPLOAD_PARAMS.uploadNameType === 'default' ? 'selected' : ''}>默认（前缀_原名）</option>
+                                <option value="index" ${CONFIG.UPLOAD_PARAMS.uploadNameType === 'index' ? 'selected' : ''}>仅前缀</option>
+                                <option value="origin" ${CONFIG.UPLOAD_PARAMS.uploadNameType === 'origin' ? 'selected' : ''}>仅原名</option>
+                                <option value="short" ${CONFIG.UPLOAD_PARAMS.uploadNameType === 'short' ? 'selected' : ''}>短链接</option>
+                            </select>
+                            <div style="margin-top: 4px; color: #666; font-size: 12px;">选择上传后的文件命名方式</div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">上传目录</label>
+                            <input type="text" name="uploadFolder" value="${CONFIG.UPLOAD_PARAMS.uploadFolder}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                            <div style="margin-top: 4px; color: #666; font-size: 12px;">指定上传目录，使用相对路径，例如：img/test</div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">通知显示时间</label>
+                            <input type="number" name="NOTIFICATION_DURATION" value="${CONFIG.NOTIFICATION_DURATION}" min="1000" step="500" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                            <div style="margin-top: 4px; color: #666; font-size: 12px;">通知消息显示的时间（毫秒）</div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">Markdown模板</label>
+                            <input type="text" name="MARKDOWN_TEMPLATE" value="${CONFIG.MARKDOWN_TEMPLATE}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                            <div style="margin-top: 4px; color: #666; font-size: 12px;">支持 {filename} 和 {url} 两个变量</div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">允许的网站</label>
+                            <input type="text" name="ALLOWED_HOSTS" value="${CONFIG.ALLOWED_HOSTS.join(',')}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                            <div style="margin-top: 4px; color: #666; font-size: 12px;">输入域名，用逗号分隔。例如：example.com, *.test.com。使用 * 表示允许所有网站</div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">最大文件大小</label>
+                            <div style="display: flex; align-items: center;">
+                                <input type="number" name="MAX_FILE_SIZE" value="${CONFIG.MAX_FILE_SIZE / 1024 / 1024}" min="1" step="1" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px 0 0 4px; font-size: 14px;">
+                                <span style="padding: 8px 12px; background: #f5f5f5; border: 1px solid #ddd; border-left: none; border-radius: 0 4px 4px 0; color: #666;">MB</span>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: flex !important; align-items: center; font-weight: normal !important;">
+                                <input type="checkbox" name="AUTO_COPY_URL" ${CONFIG.AUTO_COPY_URL ? 'checked' : ''} style="margin-right: 8px;">
+                                自动复制URL到剪贴板
+                            </label>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                            <button type="button" class="img-upload-button img-upload-button-secondary" id="img-upload-cancel" style="padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background-color 0.2s; background: #e0e0e0; color: #333;">取消</button>
+                            <button type="button" class="img-upload-button img-upload-button-secondary" id="img-upload-reset" style="padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background-color 0.2s; background: #e0e0e0; color: #333;">重置默认值</button>
+                            <button type="submit" class="img-upload-button img-upload-button-primary" style="padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background-color 0.2s; background: #2196F3; color: white;">保存</button>
+                        </div>
+                    </form>
+                `;
+
+                modal.innerHTML = content;
+                document.body.appendChild(overlay);
+                document.body.appendChild(modal);
+
+                // 事件处理
+                const form = modal.querySelector('#img-upload-config-form');
+                const cancelBtn = modal.querySelector('#img-upload-cancel');
+                const resetBtn = modal.querySelector('#img-upload-reset');
+
+                function closeModal() {
+                    document.body.removeChild(overlay);
+                    document.body.removeChild(modal);
+                }
+
+                overlay.addEventListener('click', closeModal);
+                cancelBtn.addEventListener('click', closeModal);
+
+                resetBtn.addEventListener('click', () => {
+                    if (confirm('确定要重置所有配置到默认值吗？')) {
+                        CONFIG = { ...DEFAULT_CONFIG };
+                        saveConfig({});
+                        showNotification('配置已重置为默认值！', 'success');
+                        updateConfigDisplay();
+                        closeModal();
+                    }
+                });
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    try {
+                        const formData = new FormData(form);
+                        const newConfig = {
+                            AUTH_CODE: formData.get('AUTH_CODE'),
+                            SERVER_URL: formData.get('SERVER_URL'),
+                            UPLOAD_PARAMS: {
+                                ...DEFAULT_CONFIG.UPLOAD_PARAMS,
+                                uploadChannel: formData.get('uploadChannel'),
+                                uploadNameType: formData.get('uploadNameType'),
+                                uploadFolder: formData.get('uploadFolder')
+                            },
+                            NOTIFICATION_DURATION: parseInt(formData.get('NOTIFICATION_DURATION')),
+                            MARKDOWN_TEMPLATE: formData.get('MARKDOWN_TEMPLATE'),
+                            ALLOWED_HOSTS: formData.get('ALLOWED_HOSTS')
+                                .split(',')
+                                .map(h => h.trim())
+                                .filter(h => h),
+                            MAX_FILE_SIZE: parseFloat(formData.get('MAX_FILE_SIZE')) * 1024 * 1024,
+                            AUTO_COPY_URL: formData.get('AUTO_COPY_URL') === 'on'
+                        };
+
+                        CONFIG = newConfig;
+                        saveConfig(newConfig);
+                        showNotification('配置已更新！', 'success');
+                        updateConfigDisplay();
+                        closeModal();
+                    } catch (error) {
+                        showNotification('配置格式错误：' + error.message, 'error');
+                    }
+                });
+
+                // 防止点击模态框时关闭
+                modal.addEventListener('click', (e) => e.stopPropagation());
+            }
+
+            // 更新配置显示
+            function updateConfigDisplay() {
+                const configContainer = document.getElementById('currentConfig');
+                configContainer.innerHTML = '';
+
+                const configData = [
+                    { title: '服务器地址', value: CONFIG.SERVER_URL },
+                    { title: '认证码', value: CONFIG.AUTH_CODE },
+                    { title: '上传通道', value: CONFIG.UPLOAD_PARAMS.uploadChannel },
+                    { title: '文件命名方式', value: CONFIG.UPLOAD_PARAMS.uploadNameType },
+                    { title: '上传目录', value: CONFIG.UPLOAD_PARAMS.uploadFolder },
+                    { title: 'Markdown模板', value: CONFIG.MARKDOWN_TEMPLATE },
+                    { title: '允许的网站', value: CONFIG.ALLOWED_HOSTS.join(', ') },
+                    { title: '最大文件大小', value: `${CONFIG.MAX_FILE_SIZE / 1024 / 1024} MB` },
+                    { title: '自动复制URL', value: CONFIG.AUTO_COPY_URL ? '是' : '否' }
+                ];
+
+                configData.forEach(item => {
+                    const configItem = document.createElement('div');
+                    configItem.className = 'config-item';
+                    configItem.innerHTML = `
+                        <div class="config-title">${item.title}</div>
+                        <div class="config-value">${item.value}</div>
+                    `;
+                    configContainer.appendChild(configItem);
+                });
+            }
+
+            // 初始化拖拽区域
+            function initDropZone() {
+                const dropZone = document.getElementById('dropZone');
+                let activeElement = null;
+
+                // 处理拖拽文件
+                async function handleFiles(files, targetElement) {
+                    for (const file of files) {
+                        if (file.type.startsWith('image/')) {
+                            if (!checkFileSize(file)) {
+                                continue;
+                            }
+                            await uploadImage(file, targetElement);
+                        } else {
+                            showNotification('只能上传图片文件', 'error');
+                        }
+                    }
+                }
+
+                // 监听拖拽事件
+                document.addEventListener('dragenter', (e) => {
+                    e.preventDefault();
+                    activeElement = document.activeElement;
+                    if (activeElement && ['INPUT', 'TEXTAREA'].includes(activeElement.tagName)) {
+                        dropZone.classList.add('active');
+                    }
+                });
+
+                document.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+
+                document.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    const rect = document.documentElement.getBoundingClientRect();
+                    if (e.clientX <= rect.left || e.clientX >= rect.right ||
+                        e.clientY <= rect.top || e.clientY >= rect.bottom) {
+                        dropZone.classList.remove('active');
+                    }
+                });
+
+                document.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('active');
+
+                    if (activeElement && ['INPUT', 'TEXTAREA'].includes(activeElement.tagName)) {
+                        const files = Array.from(e.dataTransfer.files);
+                        await handleFiles(files, activeElement);
+                    } else {
+                        const files = Array.from(e.dataTransfer.files);
+                        await handleFiles(files, document.getElementById('uploadArea'));
+                    }
+                });
+            }
+
+            // 初始化事件监听器
+            function initEventListeners() {
+                // 粘贴事件
+                document.addEventListener('paste', async function (event) {
+                    const items = event.clipboardData.items;
+                    let hasImage = false;
+
+                    for (let item of items) {
+                        if (item.type.startsWith('image/')) {
+                            hasImage = true;
+                            event.preventDefault();
+                            const blob = item.getAsFile();
+
+                            if (!checkFileSize(blob)) {
+                                return;
+                            }
+
+                            await uploadImage(blob, document.activeElement || document.getElementById('uploadArea'));
+                            break;
+                        }
+                    }
+                });
+
+                // 配置按钮
+                document.getElementById('configBtn').addEventListener('click', createConfigModal);
+
+                // 使用说明按钮
+                document.getElementById('usageBtn').addEventListener('click', () => {
+                    showNotification('在输入框中粘贴图片或拖拽图片文件到页面区域即可上传', 'info');
+                });
+
+                // 初始化拖拽区域
+                initDropZone();
+
+                // 初始化配置显示
+                updateConfigDisplay();
+            }
+
+            // 初始化函数
+            function init() {
+                initEventListeners();
+                showNotification('图床上传工具已加载，请配置服务器参数后使用', 'info');
+            }
+
+            // 在页面加载完成后初始化
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+</body>
+
+</html>

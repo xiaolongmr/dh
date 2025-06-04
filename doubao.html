@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图床上传工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        danger: '#EF4444',
+                        dark: '#1F2937',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .drop-shadow-custom {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            }
+            .transition-custom {
+                transition: all 0.3s ease;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-inter text-dark min-h-screen">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-picture-o text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-dark">图床上传工具</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="config-btn"
+                    class="flex items-center space-x-1 text-gray-600 hover:text-primary transition-custom">
+                    <i class="fa fa-cog"></i>
+                    <span>配置</span>
+                </button>
+                <button id="help-btn"
+                    class="flex items-center space-x-1 text-gray-600 hover:text-primary transition-custom">
+                    <i class="fa fa-question-circle"></i>
+                    <span>帮助</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 上传区域 -->
+        <section class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fa fa-cloud-upload text-primary mr-2"></i>
+                图片上传
+            </h2>
+
+            <!-- 拖拽上传区域 -->
+            <div id="drop-area"
+                class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-custom hover:border-primary/70 cursor-pointer bg-gray-50">
+                <i class="fa fa-picture-o text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-600 mb-2">拖拽图片到此处上传</p>
+                <p class="text-sm text-gray-500">或者</p>
+                <button id="select-file-btn"
+                    class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-custom">
+                    <i class="fa fa-file-image-o mr-1"></i> 选择图片
+                </button>
+                <input type="file" id="file-input" class="hidden" accept="image/*">
+            </div>
+
+            <!-- 上传选项 -->
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">上传文件夹</label>
+                    <input type="text" id="upload-folder"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom"
+                        placeholder="例如: img/test">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">命名方式</label>
+                    <select id="name-type"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom">
+                        <option value="default">默认前缀_原名</option>
+                        <option value="index">仅前缀</option>
+                        <option value="origin">仅原名</option>
+                        <option value="short">短链接命名</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 上传进度 -->
+            <div id="upload-progress-container" class="mt-6 hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">上传进度</span>
+                    <span id="upload-percentage" class="text-sm text-gray-500">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="upload-progress-bar" class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- 上传结果 -->
+            <div id="upload-result" class="mt-6 hidden">
+                <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-check-circle text-green-500 text-xl"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-green-800">上传成功</h3>
+                            <div class="mt-2 text-sm text-green-700">
+                                <p>图片链接已复制到剪贴板</p>
+                                <div class="mt-2 bg-white p-2 rounded border border-green-200 overflow-x-auto">
+                                    <code id="image-url" class="text-gray-800"></code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 随机图区域 -->
+        <section class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fa fa-random text-primary mr-2"></i>
+                随机图
+            </h2>
+
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">目录</label>
+                    <input type="text" id="random-dir"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom"
+                        placeholder="从指定目录获取随机图">
+                </div>
+                <div class="flex items-end">
+                    <button id="get-random-btn"
+                        class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-custom flex items-center">
+                        <i class="fa fa-refresh mr-1"></i> 获取随机图
+                    </button>
+                </div>
+            </div>
+
+            <!-- 随机图结果 -->
+            <div id="random-result" class="mt-4 hidden">
+                <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-shrink-0">
+                            <img id="random-image" src="" alt="随机图片" class="max-h-64 rounded-lg shadow-md">
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="text-sm font-medium text-blue-800">随机图结果</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <div class="mt-2 bg-white p-2 rounded border border-blue-200 overflow-x-auto">
+                                    <code id="random-image-url" class="text-gray-800"></code>
+                                </div>
+                                <div class="mt-2 flex space-x-2">
+                                    <button id="copy-random-url"
+                                        class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-custom">
+                                        <i class="fa fa-copy mr-1"></i> 复制链接
+                                    </button>
+                                    <button id="insert-random-image"
+                                        class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-custom">
+                                        <i class="fa fa-paste mr-1"></i> 插入Markdown
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 历史记录 -->
+        <section class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fa fa-history text-primary mr-2"></i>
+                上传历史
+            </h2>
+
+            <div id="history-container" class="space-y-3">
+                <div class="text-center text-gray-500 py-6">
+                    <i class="fa fa-folder-open-o text-3xl mb-2"></i>
+                    <p>暂无上传历史</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 配置模态框 -->
+    <div id="config-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0"
+            id="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">图床配置</h3>
+                    <button id="close-config" class="text-gray-400 hover:text-gray-500">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">服务器URL</label>
+                        <input type="text" id="server-url"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">认证码</label>
+                        <input type="text" id="auth-code"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">上传渠道</label>
+                        <select id="upload-channel"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom">
+                            <option value="telegram">Telegram</option>
+                            <option value="cfr2">Cloudflare R2</option>
+                            <option value="s3">S3</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">返回格式</label>
+                        <select id="return-format"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom">
+                            <option value="default">默认格式</option>
+                            <option value="full">完整链接</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="auto-copy"
+                            class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                        <label for="auto-copy" class="ml-2 block text-sm text-gray-700">上传后自动复制链接</label>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button id="cancel-config"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-custom">
+                        取消
+                    </button>
+                    <button id="save-config"
+                        class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-custom">
+                        保存配置
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知组件 -->
+    <div id="notification"
+        class="fixed bottom-4 right-4 max-w-xs w-full bg-white rounded-lg shadow-lg p-4 transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-start">
+        <div id="notification-icon" class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full">
+            <i class="fa fa-info text-white"></i>
+        </div>
+        <div class="ml-3">
+            <p id="notification-message" class="text-sm text-gray-800"></p>
+        </div>
+        <button id="close-notification" class="ml-auto flex-shrink-0 text-gray-400 hover:text-gray-500">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
+
+    <script>
+        // 配置项
+        const CONFIG = {
+            SERVER_URL: 'https://img.z-l.top',
+            AUTH_CODE: 'z-l.top',
+            UPLOAD_CHANNEL: 'telegram',
+            UPLOAD_FOLDER: '',
+            UPLOAD_NAME_TYPE: 'default',
+            RETURN_FORMAT: 'full',
+            AUTO_COPY_URL: true,
+            HISTORY_LIMIT: 10
+        };
+
+        // 初始化配置
+        function initConfig() {
+            // 从本地存储加载配置
+            const savedConfig = localStorage.getItem('imageUploaderConfig');
+            if (savedConfig) {
+                Object.assign(CONFIG, JSON.parse(savedConfig));
+            }
+
+            // 应用配置到UI
+            document.getElementById('server-url').value = CONFIG.SERVER_URL;
+            document.getElementById('auth-code').value = CONFIG.AUTH_CODE;
+            document.getElementById('upload-channel').value = CONFIG.UPLOAD_CHANNEL;
+            document.getElementById('upload-folder').value = CONFIG.UPLOAD_FOLDER;
+            document.getElementById('name-type').value = CONFIG.UPLOAD_NAME_TYPE;
+            document.getElementById('return-format').value = CONFIG.RETURN_FORMAT;
+            document.getElementById('auto-copy').checked = CONFIG.AUTO_COPY_URL;
+            document.getElementById('random-dir').value = CONFIG.UPLOAD_FOLDER;
+        }
+
+        // 保存配置
+        function saveConfig() {
+            CONFIG.SERVER_URL = document.getElementById('server-url').value;
+            CONFIG.AUTH_CODE = document.getElementById('auth-code').value;
+            CONFIG.UPLOAD_CHANNEL = document.getElementById('upload-channel').value;
+            CONFIG.UPLOAD_FOLDER = document.getElementById('upload-folder').value;
+            CONFIG.UPLOAD_NAME_TYPE = document.getElementById('name-type').value;
+            CONFIG.RETURN_FORMAT = document.getElementById('return-format').value;
+            CONFIG.AUTO_COPY_URL = document.getElementById('auto-copy').checked;
+
+            // 保存到本地存储
+            localStorage.setItem('imageUploaderConfig', JSON.stringify(CONFIG));
+
+            // 应用配置到随机图目录
+            document.getElementById('random-dir').value = CONFIG.UPLOAD_FOLDER;
+
+            showNotification('配置已保存', 'success');
+            closeConfigModal();
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notification-message');
+            const iconEl = document.getElementById('notification-icon');
+
+            messageEl.textContent = message;
+
+            // 设置图标和颜色
+            if (type === 'success') {
+                iconEl.className = 'flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-green-500';
+                iconEl.innerHTML = '<i class="fa fa-check text-white"></i>';
+            } else if (type === 'error') {
+                iconEl.className = 'flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-red-500';
+                iconEl.innerHTML = '<i class="fa fa-times text-white"></i>';
+            } else if (type === 'warning') {
+                iconEl.className = 'flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-yellow-500';
+                iconEl.innerHTML = '<i class="fa fa-exclamation text-white"></i>';
+            } else {
+                iconEl.className = 'flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-500';
+                iconEl.innerHTML = '<i class="fa fa-info text-white"></i>';
+            }
+
+            // 显示通知
+            notification.classList.remove('translate-y-20', 'opacity-0');
+
+            // 3秒后隐藏
+            setTimeout(() => {
+                notification.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // 复制文本到剪贴板
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => showNotification('已复制到剪贴板', 'success'))
+                .catch(err => showNotification('复制失败: ' + err.message, 'error'));
+        }
+
+        // 上传图片
+        async function uploadImage(file) {
+            const uploadProgressContainer = document.getElementById('upload-progress-container');
+            const uploadProgressBar = document.getElementById('upload-progress-bar');
+            const uploadPercentage = document.getElementById('upload-percentage');
+            const uploadResult = document.getElementById('upload-result');
+            const imageUrl = document.getElementById('image-url');
+
+            // 更新配置
+            CONFIG.UPLOAD_FOLDER = document.getElementById('upload-folder').value;
+            CONFIG.UPLOAD_NAME_TYPE = document.getElementById('name-type').value;
+
+            // 显示进度条
+            uploadProgressContainer.classList.remove('hidden');
+            uploadResult.classList.add('hidden');
+
+            // 构建上传参数
+            const queryParams = new URLSearchParams();
+            queryParams.append('authCode', CONFIG.AUTH_CODE);
+            queryParams.append('serverCompress', true);
+            queryParams.append('uploadChannel', CONFIG.UPLOAD_CHANNEL);
+            queryParams.append('autoRetry', true);
+            queryParams.append('uploadNameType', CONFIG.UPLOAD_NAME_TYPE);
+            queryParams.append('returnFormat', CONFIG.RETURN_FORMAT);
+            if (CONFIG.UPLOAD_FOLDER) {
+                queryParams.append('uploadFolder', CONFIG.UPLOAD_FOLDER);
+            }
+
+            const uploadUrl = `${CONFIG.SERVER_URL}/upload?${queryParams.toString()}`;
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // 使用Fetch API上传文件
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'omit' // 不发送凭证
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result && result[0] && result[0].src) {
+                        // 构建完整URL
+                        let fullUrl = result[0].src;
+                        if (!fullUrl.startsWith('http')) {
+                            fullUrl = `${CONFIG.SERVER_URL}${fullUrl}`;
+                        }
+
+                        // 显示结果
+                        imageUrl.textContent = fullUrl;
+                        uploadResult.classList.remove('hidden');
+
+                        // 自动复制
+                        if (CONFIG.AUTO_COPY_URL) {
+                            copyToClipboard(fullUrl);
+                        }
+
+                        // 添加到历史记录
+                        addToHistory(fullUrl, file.name);
+
+                        showNotification('上传成功', 'success');
+                    } else {
+                        showNotification('上传成功，但服务器返回格式异常', 'warning');
+                    }
+                } else {
+                    showNotification(`上传失败 (${response.status})`, 'error');
+                    console.error('上传失败，状态码:', response.status);
+                    console.error('响应内容:', await response.text());
+                }
+            } catch (error) {
+                showNotification('上传错误: ' + error.message, 'error');
+                console.error('上传错误:', error);
+            } finally {
+                // 隐藏进度条
+                uploadProgressContainer.classList.add('hidden');
+                uploadProgressBar.style.width = '0%';
+                uploadPercentage.textContent = '0%';
+            }
+        }
+
+        // 获取随机图
+        async function getRandomImage(dir = '') {
+            const randomResult = document.getElementById('random-result');
+            const randomImage = document.getElementById('random-image');
+            const randomImageUrl = document.getElementById('random-image-url');
+
+            // 显示加载状态
+            randomResult.classList.remove('hidden');
+            randomImage.src = 'https://picsum.photos/200/200?random=loading';
+            randomImage.alt = '加载中...';
+            randomImageUrl.textContent = '加载中...';
+
+            // 构建请求参数
+            const queryParams = new URLSearchParams();
+            queryParams.append('content', 'image');
+            queryParams.append('type', 'url');
+            queryParams.append('form', 'text');
+            if (dir) {
+                queryParams.append('dir', dir);
+            }
+
+            const randomUrl = `${CONFIG.SERVER_URL}/random?${queryParams.toString()}`;
+
+            try {
+                const response = await fetch(randomUrl, {
+                    method: 'GET',
+                    credentials: 'omit'
+                });
+
+                if (response.ok) {
+                    const imageUrl = await response.text();
+                    const fullUrl = imageUrl.startsWith('http') ? imageUrl : `${CONFIG.SERVER_URL}${imageUrl}`;
+
+                    // 更新UI
+                    randomImage.src = fullUrl;
+                    randomImage.alt = '随机图片';
+                    randomImageUrl.textContent = fullUrl;
+
+                    // 保存当前随机图URL
+                    randomImageUrl.dataset.url = fullUrl;
+
+                    showNotification('获取随机图成功', 'success');
+                } else {
+                    showNotification(`获取随机图失败 (${response.status})`, 'error');
+                    console.error('获取随机图失败，状态码:', response.status);
+                    console.error('响应内容:', await response.text());
+
+                    // 显示错误状态
+                    randomImage.src = 'https://picsum.photos/200/200?random=error';
+                    randomImage.alt = '加载失败';
+                    randomImageUrl.textContent = '加载失败';
+                }
+            } catch (error) {
+                showNotification('网络错误: ' + error.message, 'error');
+                console.error('网络错误:', error);
+
+                // 显示错误状态
+                randomImage.src = 'https://picsum.photos/200/200?random=error';
+                randomImage.alt = '加载失败';
+                randomImageUrl.textContent = '加载失败';
+            }
+        }
+
+        // 添加到历史记录
+        function addToHistory(url, filename) {
+            // 获取现有历史记录
+            let history = JSON.parse(localStorage.getItem('uploadHistory') || '[]');
+
+            // 添加新记录
+            history.unshift({
+                url,
+                filename,
+                timestamp: new Date().toISOString()
+            });
+
+            // 限制历史记录数量
+            if (history.length > CONFIG.HISTORY_LIMIT) {
+                history = history.slice(0, CONFIG.HISTORY_LIMIT);
+            }
+
+            // 保存历史记录
+            localStorage.setItem('uploadHistory', JSON.stringify(history));
+
+            // 更新历史记录UI
+            updateHistoryUI();
+        }
+
+        // 更新历史记录UI
+        function updateHistoryUI() {
+            const historyContainer = document.getElementById('history-container');
+            const history = JSON.parse(localStorage.getItem('uploadHistory') || '[]');
+
+            if (history.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="text-center text-gray-500 py-6">
+                        <i class="fa fa-folder-open-o text-3xl mb-2"></i>
+                        <p>暂无上传历史</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyContainer.innerHTML = '';
+
+            history.forEach((item, index) => {
+                const date = new Date(item.timestamp);
+                const formattedDate = date.toLocaleString();
+
+                const historyItem = document.createElement('div');
+                historyItem.className = 'p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-custom flex items-center justify-between';
+                historyItem.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded flex items-center justify-center text-blue-500">
+                            <i class="fa fa-image"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <p class="text-sm font-medium text-gray-900 truncate">${item.filename}</p>
+                            <p class="text-xs text-gray-500">${formattedDate}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="text-gray-500 hover:text-primary transition-custom" data-url="${item.url}" title="复制链接">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-primary transition-custom" data-url="${item.url}" title="查看图片">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                `;
+
+                // 添加点击事件
+                historyItem.querySelector('.fa-copy').parentElement.addEventListener('click', function () {
+                    copyToClipboard(this.dataset.url);
+                });
+
+                historyItem.querySelector('.fa-eye').parentElement.addEventListener('click', function () {
+                    window.open(this.dataset.url, '_blank');
+                });
+
+                historyContainer.appendChild(historyItem);
+            });
+        }
+
+        // 打开配置模态框
+        function openConfigModal() {
+            const modal = document.getElementById('config-modal');
+            const modalContent = document.getElementById('modal-content');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // 关闭配置模态框
+        function closeConfigModal() {
+            const modal = document.getElementById('config-modal');
+            const modalContent = document.getElementById('modal-content');
+
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // 初始化拖拽上传
+        function initDragAndDrop() {
+            const dropArea = document.getElementById('drop-area');
+            const fileInput = document.getElementById('file-input');
+            const selectFileBtn = document.getElementById('select-file-btn');
+
+            // 阻止默认的拖放行为
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            // 高亮拖放区域
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropArea.classList.add('border-primary');
+                dropArea.classList.add('bg-primary/5');
+            }
+
+            function unhighlight() {
+                dropArea.classList.remove('border-primary');
+                dropArea.classList.remove('bg-primary/5');
+            }
+
+            // 处理拖放文件
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length > 0) {
+                    uploadImage(files[0]);
+                }
+            }
+
+            // 处理文件选择
+            selectFileBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    uploadImage(fileInput.files[0]);
+                }
+            });
+        }
+
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 配置按钮
+            document.getElementById('config-btn').addEventListener('click', openConfigModal);
+            document.getElementById('close-config').addEventListener('click', closeConfigModal);
+            document.getElementById('cancel-config').addEventListener('click', closeConfigModal);
+            document.getElementById('save-config').addEventListener('click', saveConfig);
+
+            // 关闭通知
+            document.getElementById('close-notification').addEventListener('click', () => {
+                document.getElementById('notification').classList.add('translate-y-20', 'opacity-0');
+            });
+
+            // 随机图按钮
+            document.getElementById('get-random-btn').addEventListener('click', () => {
+                const dir = document.getElementById('random-dir').value;
+                getRandomImage(dir);
+            });
+
+            // 复制随机图链接
+            document.getElementById('copy-random-url').addEventListener('click', () => {
+                const url = document.getElementById('random-image-url').dataset.url;
+                if (url) {
+                    copyToClipboard(url);
+                }
+            });
+
+            // 插入随机图Markdown
+            document.getElementById('insert-random-image').addEventListener('click', () => {
+                const url = document.getElementById('random-image-url').dataset.url;
+                if (url) {
+                    insertMarkdownImage(url);
+                }
+            });
+        }
+
+        // 插入Markdown图片链接
+        function insertMarkdownImage(url) {
+            // 尝试找到活动的文本区域
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT')) {
+                // 在光标位置插入文本
+                const start = activeElement.selectionStart;
+                const end = activeElement.selectionEnd;
+                const text = activeElement.value;
+                const markdown = `![图片](${url})`;
+
+                activeElement.value = text.substring(0, start) + markdown + text.substring(end);
+                activeElement.focus();
+                activeElement.selectionStart = activeElement.selectionEnd = start + markdown.length;
+
+                showNotification('已插入Markdown图片链接', 'success');
+            } else {
+                showNotification('无法找到可编辑的文本区域', 'warning');
+            }
+        }
+
+        // 初始化应用
+        function initApp() {
+            initConfig();
+            initDragAndDrop();
+            initEventListeners();
+            updateHistoryUI();
+
+            showNotification('图床上传工具已就绪', 'info');
+        }
+
+        // 页面加载完成后初始化应用
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+
+</html>
