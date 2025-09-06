@@ -1,5 +1,5 @@
-# 自用
-效果以实际为主
+# 自用（遗弃了）
+效果以实际为主, 
 
 ✍🏼[视觉传达](https://xiaolongmr.github.io/) 常用的设计类型的一些网站收藏 ，不限于视觉传达
 
@@ -52,3 +52,4 @@
 ### 🦄网站数据储存在excell
 
 <iframe   src="https://view.officeapps.live.com/op/view.aspx?src=https://dj.4everland.app/a.xlsx"   width="100%"   height="500px"   frameborder="0" ></iframe>
+
